@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Get well soon, Sheru!</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&family=Pacifico&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --soft-pink: #ffdae0;
+            --deep-pink: #ff8fa3;
+            --lavender: #e2d1f9;
+            --sage-pink: #ffb7c5;
+            --glass: rgba(255, 255, 255, 0.7);
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            background: linear-gradient(135deg, #fdfcfb 0%, #e2d1f9 100%);
+            color: #5d5d5d;
+            font-family: 'Quicksand', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+            /* Prevents accidental pull-to-refresh on some mobile browsers */
+            overscroll-behavior-y: contain;
+        }
+
+        .app-container {
+            max-width: 450px; margin: 0 auto;
+            /* Added env(safe-area-inset-bottom) for iPhone 15 notch/home bar */
+            padding: 20px 20px calc(120px + env(safe-area-inset-bottom));
+            position: relative; z-index: 1;
+        }
+
+        header { text-align: center; margin-bottom: 30px; padding-top: env(safe-area-inset-top); }
+        
+        .agent-tag {
+            background: var(--deep-pink); color: white;
+            font-size: 11px; font-weight: bold;
+            padding: 4px 12px; border-radius: 20px;
+            text-transform: uppercase; letter-spacing: 1px;
+            box-shadow: 0 4px 10px rgba(255, 143, 163, 0.3);
+        }
+
+        h1 { font-family: 'Pacifico', cursive; font-size: 32px; color: #ff6b81; margin: 15px 0 5px 0; }
+
+        .card {
+            background: var(--glass); backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px); /* Safari support */
+            border: 2px solid white; border-radius: 30px;
+            padding: 25px; margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        .revive-zone {
+            text-align: center; padding: 15px;
+            background: rgba(70, 244, 192, 0.1);
+            border-radius: 20px; border: 2px dashed #46f4c0;
+            margin-bottom: 20px;
+        }
+
+        .revive-btn {
+            background: #46f4c0; color: white;
+            border: none; padding: 15px 25px;
+            border-radius: 15px; font-weight: bold;
+            cursor: pointer; transition: all 0.2s;
+            user-select: none;
+            -webkit-user-select: none; /* iPhone specific to prevent selection */
+            -webkit-touch-callout: none; /* Prevents callout menu */
+            box-shadow: 0 4px 15px rgba(70, 244, 192, 0.3);
+            width: 100%; /* Easier to tap on mobile */
+        }
+
+        /* Responsive Grids */
+        .pharmacy-grid { display: flex; justify-content: space-around; margin-top: 15px; }
+        .med-item { cursor: pointer; font-size: 32px; transition: transform 0.2s; position: relative; padding: 10px; }
+        .med-item:active { transform: scale(1.4); }
+
+        .floating-text {
+            position: fixed; pointer-events: none;
+            font-weight: bold; font-size: 18px; z-index: 3000;
+            animation: floatUpAndOut 2s ease-out forwards;
+            white-space: nowrap; text-shadow: 0 2px 10px rgba(255,255,255,0.8);
+        }
+
+        @keyframes floatUpAndOut {
+            0% { transform: translate(-50%, 0); opacity: 0; }
+            10% { opacity: 1; }
+            100% { transform: translate(-50%, -150px); opacity: 0; }
+        }
+
+        .cat-box { width: 100%; border-radius: 25px; overflow: hidden; border: 4px solid white; box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+        .cat-box img { width: 100%; display: block; border-radius: 20px; }
+
+        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .main-btn { 
+            background: white; color: #ff6b81; border: none; padding: 20px; 
+            border-radius: 25px; font-weight: bold; font-size: 15px; 
+            box-shadow: 0 6px 15px rgba(0,0,0,0.05); display: flex; 
+            flex-direction: column; align-items: center; gap: 8px;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .panic-btn { 
+            position: fixed; bottom: calc(20px + env(safe-area-inset-bottom)); 
+            left: 50%; transform: translateX(-50%); 
+            background: #ff8fa3; color: white; padding: 15px 30px; 
+            border-radius: 50px; font-weight: bold; border: 3px solid white; 
+            box-shadow: 0 10px 25px rgba(255, 143, 163, 0.4); z-index: 1000;
+            width: 80%; max-width: 300px;
+        }
+        
+        #mom-mode { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 9999; padding: 60px 25px; font-family: 'Arial', sans-serif; overflow-y: auto; }
+
+        .confetti { position: fixed; z-index: 2000; pointer-events: none; animation: fall 4s linear forwards; }
+        @keyframes fall {
+            0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+        }
+
+        .kiss { position: fixed; font-size: 35px; z-index: 2000; pointer-events: none; animation: floatUp 2.5s ease-in forwards; }
+        @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-100vh) scale(1.5); opacity: 0; } }
+    </style>
+</head>
+<body>
+
+<div id="main-ui" class="app-container">
+    <header>
+        <span class="agent-tag">🌸 Recovery Mode 🌸</span>
+        <h1>Feel better, Sheru!</h1>
+    </header>
+
+    <div class="revive-zone">
+        <p style="font-size: 12px; font-weight: bold; color: #2eb38e; margin-bottom: 10px;">HEAL AVAILABLE</p>
+        <button class="revive-btn" id="reviveBtn" 
+            onmousedown="startRevive()" onmouseup="stopRevive()" 
+            ontouchstart="startRevive()" ontouchend="stopRevive()">
+            HOLD TO REVIVE SHERU
+        </button>
+        <p id="reviveStatus" style="font-size: 11px; margin-top: 8px; color: #5d5d5d;">Must hold for 3 seconds!</p>
+    </div>
+
+    <div class="card">
+        <span style="font-weight: bold; color: #ff8fa3;">Bebu's Virtual Assets</span>
+        <div class="pharmacy-grid">
+            <span class="med-item" onclick="showBuff(event, '☕ Warm Tea Buff!', '#d2b48c')">☕</span>
+            <span class="med-item" onclick="showBuff(event, '☁️ Pillow Fluff +100', '#add8e6')">☁️</span>
+            <span class="med-item" onclick="showBuff(event, '❄️ Cooling Relief...', '#46f4c0')">❄️</span>
+            <span class="med-item" onclick="showBuff(event, '🤝 Holding Hands Active', '#ff8fa3')">🤝</span>
+        </div>
+    </div>
+
+    <div class="card" style="padding: 10px;">
+        <div class="cat-box">
+            <img id="cat-img" src="https://media1.tenor.com/m/WsWej1C3ePYAAAAC/yippee-cat-kitty.gif">
+        </div>
+    </div>
+
+    <div class="btn-grid">
+        <button class="main-btn" onclick="spawnKisses()">
+            <i class="fas fa-heart" style="font-size: 24px;"></i>
+            Get Kisses
+        </button>
+        <button class="main-btn" onclick="newCat()">
+            <i class="fas fa-cat" style="font-size: 24px;"></i>
+            New Kitty
+        </button>
+    </div>
+
+    <div class="card" style="margin-top: 25px; border: 2px dashed #ffcad4; background: rgba(255,255,255,0.3);">
+        <p style="font-size: 15px; font-style: italic; text-align: center; margin: 0; color: #ff6b81; line-height: 1.5;">
+            "Helloo Sheru, please dont be sickkk! Drink some water for me! I love you so muchh! 🌙✨"
+        </p>
+    </div>
+</div>
+
+<div id="mom-mode">
+    <div style="max-width: 600px; margin: 0 auto;">
+        <div style="color: #4285f4; font-weight: bold; margin-bottom: 20px;">📘 Physics_Notes_Revised_V2</div>
+        <h2 style="font-family: Arial;">Kinetic Energy and Thermodynamics</h2>
+        <hr>
+        <p style="line-height: 1.6;">The first law of thermodynamics states that energy can neither be created nor destroyed...</p>
+        <button onclick="toggleMomMode()" style="opacity: 0.1; position: fixed; bottom: 0; right: 0; width: 100px; height: 100px;"></button>
+    </div>
+</div>
+
+<button class="panic-btn" onclick="toggleMomMode()">
+    <i class="fas fa-eye-slash"></i> SOMEONE IS COMING!
+</button>
+
+<script>
+    function showBuff(event, text, color) {
+        // Prevent zoom on double tap
+        if(event) event.preventDefault();
+        
+        const buff = document.createElement('div');
+        buff.className = 'floating-text';
+        buff.innerText = text;
+        buff.style.color = color;
+        
+        // Mobile-friendly coordinates
+        const x = event.touches ? event.touches[0].clientX : event.clientX;
+        const y = event.touches ? event.touches[0].clientY : event.clientY;
+        
+        buff.style.left = x + 'px';
+        buff.style.top = y + 'px';
+        document.body.appendChild(buff);
+        setTimeout(() => buff.remove(), 2000);
+    }
+
+    let reviveTimer;
+    function startRevive(e) {
+        if(e) e.preventDefault();
+        let count = 0;
+        document.getElementById('reviveBtn').innerText = "REVIVING...";
+        document.getElementById('reviveBtn').style.background = "#2eb38e";
+        
+        reviveTimer = setInterval(() => {
+            count++;
+            if(count >= 30) {
+                clearInterval(reviveTimer);
+                document.getElementById('reviveBtn').innerText = "SHERU REVIVED! ❤️";
+                document.getElementById('reviveStatus').innerText = "MAX HEAL ACHIEVED ✨";
+                triggerMassiveCelebration();
+            }
+        }, 100);
+    }
+
+    function stopRevive() {
+        clearInterval(reviveTimer);
+        if(document.getElementById('reviveBtn').innerText !== "SHERU REVIVED! ❤️") {
+            document.getElementById('reviveBtn').innerText = "HOLD TO REVIVE SHERU";
+            document.getElementById('reviveBtn').style.background = "#46f4c0";
+        }
+    }
+
+    function triggerMassiveCelebration() {
+        const emojis = ['💖', '🌸', '✨', '🎀', '🍭', '🌈', '🧸', '😘', '❤️', '🦋'];
+        const end = Date.now() + 5000;
+
+        const interval = setInterval(() => {
+            if (Date.now() > end) return clearInterval(interval);
+
+            const confetti = document.createElement('div');
+            confetti.className = 'confetti';
+            confetti.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+            confetti.style.left = Math.random() * 100 + 'vw';
+            confetti.style.top = '-5vh';
+            confetti.style.fontSize = (Math.random() * 25 + 20) + 'px';
+            confetti.style.animationDuration = (Math.random() * 2 + 1.5) + 's';
+            
+            document.body.appendChild(confetti);
+            setTimeout(() => confetti.remove(), 4000);
+        }, 50);
+    }
+
+    function spawnKisses() {
+        const icons = ['🌸', '💖', '😘', '✨', '🎀'];
+        for(let i=0; i<35; i++) {
+            setTimeout(() => {
+                const kiss = document.createElement('div');
+                kiss.innerHTML = icons[Math.floor(Math.random() * icons.length)];
+                kiss.className = 'kiss';
+                kiss.style.left = Math.random() * 100 + 'vw';
+                kiss.style.top = '100vh';
+                document.body.appendChild(kiss);
+                setTimeout(() => kiss.remove(), 2500);
+            }, i * 60);
+        }
+    }
+
+    const cats = [
+        "https://media.tenor.com/Pr1SLLaw6ssAAAAi/p1.gif",
+        "https://media1.tenor.com/m/lfDATg4Bhc0AAAAC/happy-cat.gif",
+        "https://media1.tenor.com/m/WsWej1C3ePYAAAAC/yippee-cat-kitty.gif",
+        "https://media.tenor.com/m/9t97uX0mYpIAAAAd/mrrp-apple-cat.gif",
+        "https://media.tenor.com/26U_e8f2m_IAAAAi/cat-meow.gif"
+    ];
+
+    function newCat() {
+        const img = document.getElementById('cat-img');
+        img.style.opacity = '0.5';
+        setTimeout(() => {
+            img.src = cats[Math.floor(Math.random() * cats.length)];
+            img.style.opacity = '1';
+        }, 150);
+    }
+
+    function toggleMomMode() {
+        const main = document.getElementById('main-ui');
+        const mom = document.getElementById('mom-mode');
+        const pBtn = document.querySelector('.panic-btn');
+        if (mom.style.display === 'block') {
+            mom.style.display = 'none';
+            main.style.display = 'block';
+            pBtn.innerHTML = '<i class="fas fa-eye-slash"></i> SOMEONE IS COMING!';
+            document.body.style.background = "linear-gradient(135deg, #fdfcfb 0%, #e2d1f9 100%)";
+        } else {
+            mom.style.display = 'block';
+            main.style.display = 'none';
+            pBtn.innerHTML = 'Return to Notes';
+            document.body.style.background = "white";
+        }
+    }
+</script>
+
+</body>
+</html>
